@@ -1,58 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rooms &amp; Suites — Grand Horizon</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Rooms &amp; Suites — Grand Horizon</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<nav class="navbar">
-  <a href="index.html" class="navbar-brand">
-    <div class="navbar-logo">GH</div>
-    <span class="navbar-name">Grand <span>Horizon</span></span>
+<nav class="nav" id="mainNav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-emblem">GH</div>
+    <span class="nav-brand-text">Grand <em>Horizon</em></span>
   </a>
-  <div class="navbar-nav">
-    <a href="index.html" class="nav-link">Home</a>
-    <a href="rooms.html" class="nav-link active">Rooms</a>
-    <a href="booking.html" class="nav-link">Book Now</a>
-    <a href="reservations.html" class="nav-link">My Reservations</a>
-    <a href="booking.html" class="nav-link nav-btn">Reserve</a>
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link">Home</a>
+    <a href="rooms.html"       class="nav-link active">Rooms</a>
+    <a href="booking.html"     class="nav-link">Book Now</a>
+    <a href="reservations.html" class="nav-link">Reservations</a>
+    <a href="booking.html"     class="nav-link nav-cta">Reserve a Room</a>
   </div>
+  <button class="nav-mobile-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
 </nav>
 
+<!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="page-header-tag">Accommodations</div>
-  <h1>Rooms &amp; <em>Suites</em></h1>
+  <div class="page-header-bg" style="background-image:url('https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1600&q=80');"></div>
+  <div class="page-header-content">
+    <div class="page-header-label">Accommodations</div>
+    <h1>Rooms &amp; <span class="italic">Suites</span></h1>
+  </div>
 </div>
 
-<div class="filter-bar">
-  <span class="filter-label">Filter:</span>
-  <button class="filter-btn active" data-filter="all">All Rooms</button>
-  <button class="filter-btn" data-filter="Standard">Standard</button>
-  <button class="filter-btn" data-filter="Deluxe">Deluxe</button>
-  <button class="filter-btn" data-filter="Suite">Suite</button>
+<!-- FILTER BAR -->
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-filter="all">All <span class="filter-count">9</span></button>
+  <button class="filter-btn" data-filter="Standard">Standard <span class="filter-count">3</span></button>
+  <button class="filter-btn" data-filter="Deluxe">Deluxe <span class="filter-count">3</span></button>
+  <button class="filter-btn" data-filter="Penthouse">Penthouse <span class="filter-count">3</span></button>
   <button class="filter-btn" data-filter="available">Available Only</button>
-  <span class="filter-label" style="margin-left:auto;" id="roomCount"></span>
+  <div class="filter-spacer"></div>
+  <span class="filter-total" id="filterTotal">9 rooms</span>
 </div>
 
-<div class="section" style="padding-top: 60px;">
-  <div class="rooms-grid" id="roomsGrid"></div>
+<!-- ROOMS GRID -->
+<div style="background:var(--obsidian);padding:2px 0 80px;">
+  <div class="rooms-grid" id="roomsGrid" style="margin:2px 0 0;"></div>
 </div>
 
-<!-- Room Detail Modal -->
+<!-- ROOM DETAIL MODAL -->
 <div class="modal-overlay" id="roomModal">
-  <div class="modal">
-    <button class="modal-close" id="modalClose">&times;</button>
+  <div class="modal" style="padding:0;overflow:hidden;">
+    <button class="modal-close" id="modalClose" style="top:12px;right:12px;z-index:10;">&#215;</button>
     <div id="modalContent"></div>
   </div>
 </div>
 
 <footer class="footer">
-  <div class="footer-bottom" style="border-top: none; padding-top: 0;">
-    <span>&#169; 2024 Grand Horizon Hotel</span>
-    <span style="color: var(--gold)">Hotel Management System v1.0</span>
+  <div class="footer-bottom" style="border-top:none;padding-top:0;">
+    <span class="footer-copy">&#169; 2024 Grand Horizon Hotel</span>
+    <span class="footer-badge">Hotel Management System</span>
   </div>
 </footer>
 
@@ -61,53 +68,55 @@
 <script src="js/rooms.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  let currentFilter = 'all';
   const grid = document.getElementById('roomsGrid');
-  const countEl = document.getElementById('roomCount');
+  const totalEl = document.getElementById('filterTotal');
+  let active = 'all';
 
   function applyFilter() {
-    let filtered = ROOMS;
-    if (currentFilter === 'available') {
-      filtered = ROOMS.filter(r => r.available);
-    } else if (currentFilter !== 'all') {
-      filtered = ROOMS.filter(r => r.type === currentFilter);
-    }
-    renderRoomCards(grid, filtered, true);
-    countEl.textContent = `${filtered.length} room${filtered.length !== 1 ? 's' : ''} found`;
+    let rooms = ROOMS;
+    if (active === 'available') rooms = ROOMS.filter(r => r.available);
+    else if (active !== 'all')  rooms = ROOMS.filter(r => r.type === active);
+    renderRoomCards(grid, rooms, true);
+    totalEl.textContent = `${rooms.length} room${rooms.length!==1?'s':''}`;
   }
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
+      active = btn.dataset.filter;
       applyFilter();
     });
   });
-
   applyFilter();
 
   // Modal
   const modal = document.getElementById('roomModal');
   document.getElementById('modalClose').addEventListener('click', () => modal.classList.remove('open'));
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+  modal.addEventListener('click', e => { if(e.target===modal) modal.classList.remove('open'); });
 
-  window.openRoomModal = (roomId) => {
-    const room = ROOMS.find(r => r.id === roomId);
-    if (!room) return;
+  window.openRoomModal = id => {
+    const r = ROOMS.find(x => x.id === id);
+    if (!r) return;
     document.getElementById('modalContent').innerHTML = `
-      <div class="modal-title">${room.name}</div>
-      <div class="modal-subtitle" style="color: var(--gold); font-size:11px; letter-spacing:0.15em; text-transform:uppercase;">${room.type} Room &bull; Room ${room.number}</div>
-      <img src="${room.image}" alt="${room.name}" style="width:100%; height:200px; object-fit:cover; margin: 20px 0;">
-      <p style="font-size:13px; color: var(--gray); line-height:1.8; margin-bottom:20px;">${room.longDesc}</p>
-      <div class="amenity-list" style="margin-bottom:24px;">
-        ${room.amenities.map(a => `<span class="amenity-tag" style="border-color: var(--gold-pale); color: var(--navy);">${a}</span>`).join('')}
+      <div class="room-modal-img" style="height:260px;">
+        <img src="${r.img}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover;">
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div class="room-price">$${room.price}<span>/night</span></div>
-        ${room.available
-          ? `<a href="booking.html?room=${room.id}" class="btn-book" style="padding:13px 28px; font-size:11px;">Book This Room</a>`
-          : `<span class="btn-book disabled" style="padding:13px 28px; font-size:11px;">Not Available</span>`}
+      <div style="padding:36px 40px;">
+        <div class="room-modal-type">${r.type} &nbsp;·&nbsp; Room ${r.number} &nbsp;·&nbsp; ${r.sqft} ft²</div>
+        <div class="room-modal-name">${r.name}</div>
+        <p class="room-modal-desc">${r.long}</p>
+        <div class="room-modal-amenities">
+          ${r.amenities.map(a=>`<span class="room-amenity">${a}</span>`).join('')}
+        </div>
+        <div class="room-modal-footer">
+          <div class="room-price"><sup>$</sup>${r.price.toLocaleString()}<sub>&nbsp;/night</sub></div>
+          <div style="display:flex;gap:8px;">
+            ${r.available
+              ? `<a href="booking.html?room=${r.id}" class="btn-primary" style="font-size:10px;padding:11px 22px;">Book This Room →</a>`
+              : `<span class="btn-ghost" style="pointer-events:none;opacity:0.4;">Currently Unavailable</span>`}
+          </div>
+        </div>
       </div>
     `;
     modal.classList.add('open');

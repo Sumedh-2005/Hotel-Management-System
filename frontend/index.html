@@ -1,92 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grand Horizon — Luxury Hotel</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Grand Horizon — Luxury Hotel &amp; Residences</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<nav class="navbar">
-  <a href="index.html" class="navbar-brand">
-    <div class="navbar-logo">GH</div>
-    <span class="navbar-name">Grand <span>Horizon</span></span>
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-emblem">GH</div>
+    <span class="nav-brand-text">Grand <em>Horizon</em></span>
   </a>
-  <div class="navbar-nav">
-    <a href="index.html" class="nav-link active">Home</a>
-    <a href="rooms.html" class="nav-link">Rooms</a>
-    <a href="booking.html" class="nav-link">Book Now</a>
-    <a href="reservations.html" class="nav-link">My Reservations</a>
-    <a href="booking.html" class="nav-link nav-btn">Reserve</a>
+  <div class="nav-links">
+    <a href="index.html"       class="nav-link active">Home</a>
+    <a href="rooms.html"       class="nav-link">Rooms</a>
+    <a href="booking.html"     class="nav-link">Book Now</a>
+    <a href="reservations.html" class="nav-link">Reservations</a>
+    <a href="booking.html"     class="nav-link nav-cta">Reserve a Room</a>
   </div>
+  <button class="nav-mobile-toggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-tag">Est. 1924 &middot; Five Star Experience</div>
-  <h1>Where Luxury<br>Meets <em>Serenity</em></h1>
-  <p class="hero-desc">An extraordinary retreat where timeless elegance and modern comfort converge. Experience hospitality reimagined.</p>
-  <div class="hero-actions">
-    <a href="rooms.html" class="btn-primary">Explore Rooms</a>
-    <a href="booking.html" class="btn-secondary">Book Your Stay</a>
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-label reveal">
+      <span class="hero-label-line"></span>Est. 1924 &nbsp;·&nbsp; Five-Star Collection
+    </div>
+    <h1 class="hero-title reveal reveal-delay-1">
+      Where Stillness<br>Becomes <span class="italic">Luxury</span>
+    </h1>
+    <p class="hero-subtitle reveal reveal-delay-2">
+      An extraordinary address in the heart of the city. Nine distinct accommodations crafted for those who regard time as the ultimate luxury.
+    </p>
+    <div class="hero-actions reveal reveal-delay-3">
+      <a href="rooms.html" class="btn-primary">
+        Explore Rooms
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="booking.html" class="btn-ghost">Reserve Now</a>
+    </div>
   </div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num">48</div><div class="stat-label">Luxury Rooms</div></div>
-    <div class="stat"><div class="stat-num">5&#9733;</div><div class="stat-label">Rating</div></div>
-    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Concierge</div></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count="9">9</div>
+      <div class="hero-stat-label">Rooms &amp; Suites</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">5<span style="font-size:20px;">★</span></div>
+      <div class="hero-stat-label">Rating</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">24<span style="font-size:18px;">h</span></div>
+      <div class="hero-stat-label">Concierge</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num" data-count="1924">1924</div>
+      <div class="hero-stat-label">Est. Year</div>
+    </div>
   </div>
 </section>
 
-<section class="section" style="background: var(--white);">
-  <div class="section-tag">Our Accommodations</div>
-  <h2 class="section-title">Rooms &amp; <em>Suites</em></h2>
-  <p class="section-desc">Each room is a sanctuary, thoughtfully curated with the finest materials and contemporary amenities.</p>
-  <div class="rooms-grid" id="homeRoomsGrid"></div>
-  <div style="text-align:center; margin-top: 48px;">
-    <a href="rooms.html" class="btn-primary">View All Rooms</a>
-  </div>
-</section>
-
+<!-- ROOMS PREVIEW -->
+<div class="divider divider-amber"></div>
 <section class="section">
-  <div class="section-tag">Why Grand Horizon</div>
-  <h2 class="section-title">A Class <em>Apart</em></h2>
+  <div class="section-label reveal">Our Accommodations</div>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+    <h2 class="section-title reveal reveal-delay-1">Rooms &amp; <span class="italic">Suites</span></h2>
+    <a href="rooms.html" class="btn-ghost reveal reveal-delay-2" style="flex-shrink:0;margin-bottom:16px;">View All Rooms →</a>
+  </div>
+  <div class="rooms-grid rooms-grid-home" id="homeGrid"></div>
+</section>
+
+<!-- FEATURES -->
+<div class="divider"></div>
+<section class="features-section">
+  <div class="section-label reveal">The Grand Horizon Difference</div>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+    <h2 class="section-title reveal reveal-delay-1">Crafted for the <span class="italic">Discerning</span></h2>
+    <p class="section-desc reveal reveal-delay-2" style="margin-bottom:16px;">Every element considered. Every detail intentional.</p>
+  </div>
   <div class="features-grid">
-    <div class="feature-card"><div class="feature-num">01</div><div class="feature-card-title">Curated Spaces</div><p class="feature-card-desc">Each room individually designed by award-winning architects blending local artistry with global luxury.</p></div>
-    <div class="feature-card"><div class="feature-num">02</div><div class="feature-card-title">Fine Dining</div><p class="feature-card-desc">Three Michelin-starred restaurants serving seasonal menus from finest local produce.</p></div>
-    <div class="feature-card"><div class="feature-num">03</div><div class="feature-card-title">Wellness Sanctuary</div><p class="feature-card-desc">A 10,000 sq ft spa offering bespoke treatments, thermal pools, and fitness facility.</p></div>
-    <div class="feature-card"><div class="feature-num">04</div><div class="feature-card-title">Instant Booking</div><p class="feature-card-desc">Streamlined reservation system with instant confirmation and real-time availability.</p></div>
-    <div class="feature-card"><div class="feature-num">05</div><div class="feature-card-title">Smart Technology</div><p class="feature-card-desc">Voice-controlled systems for lighting, climate, and entertainment throughout.</p></div>
-    <div class="feature-card"><div class="feature-num">06</div><div class="feature-card-title">Concierge 24/7</div><p class="feature-card-desc">Multilingual concierge professionals available around the clock for every request.</p></div>
+    <div class="feature-item reveal">
+      <div class="feature-n">01</div>
+      <div class="feature-icon">◈</div>
+      <div class="feature-title">Curated Interiors</div>
+      <p class="feature-desc">Each room designed by award-winning architects, blending regional artistry with contemporary luxury — no two spaces identical.</p>
+    </div>
+    <div class="feature-item reveal reveal-delay-1">
+      <div class="feature-n">02</div>
+      <div class="feature-icon">⊞</div>
+      <div class="feature-title">Michelin Dining</div>
+      <p class="feature-desc">Three Michelin-starred restaurants serving seasonally-driven menus from the world's finest produce, prepared tableside.</p>
+    </div>
+    <div class="feature-item reveal reveal-delay-2">
+      <div class="feature-n">03</div>
+      <div class="feature-icon">◎</div>
+      <div class="feature-title">Wellness Sanctuary</div>
+      <p class="feature-desc">A 10,000 sq ft private spa with thermal pools, bespoke treatments, and a state-of-the-art training studio.</p>
+    </div>
+    <div class="feature-item reveal reveal-delay-3">
+      <div class="feature-n">04</div>
+      <div class="feature-icon">▷</div>
+      <div class="feature-title">Instant Confirmation</div>
+      <p class="feature-desc">Our real-time booking system provides instant confirmation with live availability across all room categories.</p>
+    </div>
+    <div class="feature-item reveal reveal-delay-4">
+      <div class="feature-n">05</div>
+      <div class="feature-icon">⌇</div>
+      <div class="feature-title">Intelligent Rooms</div>
+      <p class="feature-desc">Voice-controlled climate, lighting, and entertainment. Seamless ultra-fast connectivity throughout the property.</p>
+    </div>
+    <div class="feature-item reveal reveal-delay-5">
+      <div class="feature-n">06</div>
+      <div class="feature-icon">✦</div>
+      <div class="feature-title">Personal Concierge</div>
+      <p class="feature-desc">A dedicated team of multilingual specialists — your private liaison for reservations, itineraries, and every request.</p>
+    </div>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer class="footer">
-  <div class="footer-top">
+  <div class="footer-grid">
     <div>
-      <div class="footer-brand-name">Grand <span>Horizon</span></div>
-      <p class="footer-desc">A landmark of luxury since 1924, offering unparalleled hospitality in the heart of the city.</p>
+      <div class="footer-brand-name">Grand <em>Horizon</em></div>
+      <p class="footer-tagline">A landmark of refined hospitality since 1924 — where every stay becomes a story worth telling.</p>
+      <div class="footer-divider"></div>
+      <div class="footer-contact">
+        +1 (800) 555-GRAND<br>
+        reservations@grandhorizon.com<br>
+        1 Horizon Plaza, New York, NY
+      </div>
     </div>
     <div>
-      <div class="footer-heading">Navigation</div>
+      <div class="footer-heading">Navigate</div>
       <ul class="footer-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="rooms.html">Rooms &amp; Suites</a></li>
-        <li><a href="booking.html">Reservations</a></li>
+        <li><a href="booking.html">Make a Reservation</a></li>
         <li><a href="reservations.html">My Bookings</a></li>
       </ul>
     </div>
     <div>
-      <div class="footer-heading">Contact</div>
+      <div class="footer-heading">Experiences</div>
       <ul class="footer-links">
-        <li><a href="#">+1 (800) 555-GRAND</a></li>
-        <li><a href="#">reservations@grandhorizon.com</a></li>
-        <li><a href="#">1 Horizon Plaza, New York</a></li>
+        <li><a href="#">The Spa</a></li>
+        <li><a href="#">Fine Dining</a></li>
+        <li><a href="#">Events &amp; Weddings</a></li>
+        <li><a href="#">Corporate Stays</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Cancellation Policy</a></li>
+        <li><a href="#">Cookie Settings</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>&#169; 2024 Grand Horizon Hotel. All rights reserved.</span>
-    <span style="color: var(--gold)">Hotel Management System v1.0</span>
+    <span class="footer-copy">&#169; 2024 Grand Horizon Hotel. All rights reserved. Built by <em>HMS v1.0</em></span>
+    <span class="footer-badge">Hotel Management System</span>
   </div>
 </footer>
 
@@ -94,9 +177,9 @@
 <script src="js/main.js"></script>
 <script src="js/rooms.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    renderRoomCards(document.getElementById('homeRoomsGrid'), ROOMS.slice(0, 3));
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  renderRoomCards(document.getElementById('homeGrid'), ROOMS.slice(0, 3));
+});
 </script>
 </body>
 </html>
