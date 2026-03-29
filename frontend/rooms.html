@@ -58,7 +58,7 @@
 
 <footer class="footer">
   <div class="footer-bottom" style="border-top:none;padding-top:0;">
-    <span class="footer-copy">&#169; 2024 Grand Horizon Hotel</span>
+    <span class="footer-copy">&#169; 2024 Grand Horizon Hotel. All rights reserved. Built by <em>Sumedh Ajay Talokar</em></span>
     <span class="footer-badge">Hotel Management System</span>
   </div>
 </footer>
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${r.amenities.map(a=>`<span class="room-amenity">${a}</span>`).join('')}
         </div>
         <div class="room-modal-footer">
-          <div class="room-price"><sup>$</sup>${r.price.toLocaleString()}<sub>&nbsp;/night</sub></div>
+          <div class="room-price"><sup>₹</sup>${r.price.toLocaleString('en-IN')}<sub>&nbsp;/night</sub></div>
           <div style="display:flex;gap:8px;">
             ${r.available
               ? `<a href="booking.html?room=${r.id}" class="btn-primary" style="font-size:10px;padding:11px 22px;">Book This Room →</a>`
