@@ -8,22 +8,22 @@
 </head>
 <body>
 
-<nav class="nav" id="mainNav">
+<nav class="nav scrolled" id="mainNav">
   <a href="index.html" class="nav-brand">
     <div class="nav-emblem">GH</div>
-    <span class="nav-brand-text">Grand <em>Horizon</em></span>
+    <span class="nav-brand-name">Grand <em>Horizon</em></span>
   </a>
   <div class="nav-links">
-    <a href="index.html"       class="nav-link">Home</a>
-    <a href="rooms.html"       class="nav-link active">Rooms</a>
-    <a href="booking.html"     class="nav-link">Book Now</a>
+    <a href="index.html"        class="nav-link">Home</a>
+    <a href="rooms.html"        class="nav-link active">Rooms</a>
+    <a href="booking.html"      class="nav-link">Book Now</a>
     <a href="reservations.html" class="nav-link">Reservations</a>
-    <a href="booking.html"     class="nav-link nav-cta">Reserve a Room</a>
+    <a href="booking.html"      class="nav-link nav-cta">Reserve a Room</a>
   </div>
   <button class="nav-mobile-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
 </nav>
 
-<!-- PAGE HEADER -->
+<!-- Page header -->
 <div class="page-header">
   <div class="page-header-bg" style="background-image:url('https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1600&q=80');"></div>
   <div class="page-header-content">
@@ -32,9 +32,9 @@
   </div>
 </div>
 
-<!-- FILTER BAR -->
-<div class="filter-bar" id="filterBar">
-  <button class="filter-btn active" data-filter="all">All <span class="filter-count">9</span></button>
+<!-- Filter bar -->
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">All Rooms <span class="filter-count">9</span></button>
   <button class="filter-btn" data-filter="Standard">Standard <span class="filter-count">3</span></button>
   <button class="filter-btn" data-filter="Deluxe">Deluxe <span class="filter-count">3</span></button>
   <button class="filter-btn" data-filter="Penthouse">Penthouse <span class="filter-count">3</span></button>
@@ -43,12 +43,12 @@
   <span class="filter-total" id="filterTotal">9 rooms</span>
 </div>
 
-<!-- ROOMS GRID -->
-<div style="background:var(--obsidian);padding:2px 0 80px;">
-  <div class="rooms-grid" id="roomsGrid" style="margin:2px 0 0;"></div>
+<!-- Rooms grid -->
+<div class="section" style="padding-top:48px;">
+  <div class="rooms-grid" id="roomsGrid"></div>
 </div>
 
-<!-- ROOM DETAIL MODAL -->
+<!-- Room detail modal -->
 <div class="modal-overlay" id="roomModal">
   <div class="modal" style="padding:0;overflow:hidden;">
     <button class="modal-close" id="modalClose" style="top:12px;right:12px;z-index:10;">&#215;</button>
@@ -68,7 +68,7 @@
 <script src="js/rooms.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const grid = document.getElementById('roomsGrid');
+  const grid    = document.getElementById('roomsGrid');
   const totalEl = document.getElementById('filterTotal');
   let active = 'all';
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (active === 'available') rooms = ROOMS.filter(r => r.available);
     else if (active !== 'all')  rooms = ROOMS.filter(r => r.type === active);
     renderRoomCards(grid, rooms, true);
-    totalEl.textContent = `${rooms.length} room${rooms.length!==1?'s':''}`;
+    totalEl.textContent = rooms.length + ' room' + (rooms.length !== 1 ? 's' : '');
   }
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Modal
   const modal = document.getElementById('roomModal');
   document.getElementById('modalClose').addEventListener('click', () => modal.classList.remove('open'));
-  modal.addEventListener('click', e => { if(e.target===modal) modal.classList.remove('open'); });
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
   window.openRoomModal = id => {
     const r = ROOMS.find(x => x.id === id);
@@ -102,23 +102,22 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="room-modal-img" style="height:260px;">
         <img src="${r.img}" alt="${r.name}" style="width:100%;height:100%;object-fit:cover;">
       </div>
-      <div style="padding:36px 40px;">
-        <div class="room-modal-type">${r.type} &nbsp;·&nbsp; Room ${r.number} &nbsp;·&nbsp; ${r.sqft} ft²</div>
+      <div style="padding:36px 40px 40px;">
+        <div class="room-modal-type">${r.type} &nbsp;&middot;&nbsp; Room ${r.number} &nbsp;&middot;&nbsp; ${r.sqft} sq ft</div>
         <div class="room-modal-name">${r.name}</div>
         <p class="room-modal-desc">${r.long}</p>
         <div class="room-modal-amenities">
-          ${r.amenities.map(a=>`<span class="room-amenity">${a}</span>`).join('')}
+          ${r.amenities.map(a => `<span class="room-amenity">${a}</span>`).join('')}
         </div>
         <div class="room-modal-footer">
-          <div class="room-price"><sup>₹</sup>${r.price.toLocaleString('en-IN')}<sub>&nbsp;/night</sub></div>
+          <div class="room-price"><sup>&#8377;</sup>${r.price.toLocaleString('en-IN')}<sub>&nbsp;/night</sub></div>
           <div style="display:flex;gap:8px;">
             ${r.available
-              ? `<a href="booking.html?room=${r.id}" class="btn-primary" style="font-size:10px;padding:11px 22px;">Book This Room →</a>`
-              : `<span class="btn-ghost" style="pointer-events:none;opacity:0.4;">Currently Unavailable</span>`}
+              ? `<a href="booking.html?room=${r.id}" class="btn-primary" style="font-size:10px;padding:11px 22px;">Book This Room &rarr;</a>`
+              : `<span class="btn-ghost" style="pointer-events:none;opacity:0.45;font-size:10px;padding:11px 22px;">Currently Unavailable</span>`}
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
     modal.classList.add('open');
   };
 });

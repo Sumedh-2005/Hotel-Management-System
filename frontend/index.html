@@ -8,36 +8,35 @@
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ══ NAV ══════════════════════════════════ -->
 <nav class="nav" id="mainNav">
   <a href="index.html" class="nav-brand">
     <div class="nav-emblem">GH</div>
-    <span class="nav-brand-text">Grand <em>Horizon</em></span>
+    <span class="nav-brand-name">Grand <em>Horizon</em></span>
   </a>
   <div class="nav-links">
-    <a href="index.html"       class="nav-link active">Home</a>
-    <a href="rooms.html"       class="nav-link">Rooms</a>
-    <a href="booking.html"     class="nav-link">Book Now</a>
+    <a href="index.html"        class="nav-link active">Home</a>
+    <a href="rooms.html"        class="nav-link">Rooms</a>
+    <a href="booking.html"      class="nav-link">Book Now</a>
     <a href="reservations.html" class="nav-link">Reservations</a>
-    <a href="booking.html"     class="nav-link nav-cta">Reserve a Room</a>
+    <a href="booking.html"      class="nav-link nav-cta">Reserve a Room</a>
   </div>
-  <button class="nav-mobile-toggle" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="nav-mobile-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
 </nav>
 
-<!-- HERO -->
+<!-- ══ HERO (full-screen photo) ═════════════ -->
 <section class="hero">
-  <div class="hero-bg"></div>
+  <div class="hero-bg" id="heroBg"></div>
+
   <div class="hero-content">
     <div class="hero-label reveal">
-      <span class="hero-label-line"></span>Est. 1924 &nbsp;·&nbsp; Five-Star Collection
+      <span class="hero-label-line"></span>Est. 1924 &nbsp;&middot;&nbsp; Five-Star Collection
     </div>
     <h1 class="hero-title reveal reveal-delay-1">
       Where Stillness<br>Becomes <span class="italic">Luxury</span>
     </h1>
     <p class="hero-subtitle reveal reveal-delay-2">
-      An extraordinary address in the heart of the city. Nine distinct accommodations crafted for those who regard time as the ultimate luxury.
+      An extraordinary address in the heart of Mumbai. Nine distinct accommodations crafted for those who regard time as the ultimate luxury.
     </p>
     <div class="hero-actions reveal reveal-delay-3">
       <a href="rooms.html" class="btn-primary">
@@ -47,96 +46,99 @@
       <a href="booking.html" class="btn-ghost">Reserve Now</a>
     </div>
   </div>
+
+  <!-- Stats bar at the bottom of hero -->
   <div class="hero-stats">
     <div class="hero-stat">
       <div class="hero-stat-num" data-count="9">9</div>
       <div class="hero-stat-label">Rooms &amp; Suites</div>
     </div>
     <div class="hero-stat">
-      <div class="hero-stat-num">5<span style="font-size:20px;">★</span></div>
-      <div class="hero-stat-label">Rating</div>
+      <div class="hero-stat-num">5&#9733;</div>
+      <div class="hero-stat-label">Star Rating</div>
     </div>
     <div class="hero-stat">
-      <div class="hero-stat-num">24<span style="font-size:18px;">h</span></div>
+      <div class="hero-stat-num">24h</div>
       <div class="hero-stat-label">Concierge</div>
     </div>
     <div class="hero-stat">
-      <div class="hero-stat-num" data-count="1924">1924</div>
+      <div class="hero-stat-num">1924</div>
       <div class="hero-stat-label">Est. Year</div>
     </div>
   </div>
 </section>
 
-<!-- ROOMS PREVIEW -->
-<div class="divider divider-amber"></div>
+<!-- ══ ROOMS PREVIEW ════════════════════════ -->
+<div class="divider divider-gold"></div>
 <section class="section">
   <div class="section-label reveal">Our Accommodations</div>
   <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;">
     <h2 class="section-title reveal reveal-delay-1">Rooms &amp; <span class="italic">Suites</span></h2>
-    <a href="rooms.html" class="btn-ghost reveal reveal-delay-2" style="flex-shrink:0;margin-bottom:16px;">View All Rooms →</a>
+    <a href="rooms.html" class="btn-ghost reveal reveal-delay-2" style="flex-shrink:0;margin-bottom:16px;">View All Rooms &rarr;</a>
   </div>
-  <div class="rooms-grid rooms-grid-home" id="homeGrid"></div>
+  <div class="rooms-grid-home" id="homeGrid"></div>
 </section>
 
-<!-- FEATURES -->
+<!-- ══ FEATURES ══════════════════════════════ -->
 <div class="divider"></div>
 <section class="features-section">
   <div class="section-label reveal">The Grand Horizon Difference</div>
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:0;">
     <h2 class="section-title reveal reveal-delay-1">Crafted for the <span class="italic">Discerning</span></h2>
     <p class="section-desc reveal reveal-delay-2" style="margin-bottom:16px;">Every element considered. Every detail intentional.</p>
   </div>
   <div class="features-grid">
     <div class="feature-item reveal">
       <div class="feature-n">01</div>
-      <div class="feature-icon">◈</div>
+      <div class="feature-icon">&#9670;</div>
       <div class="feature-title">Curated Interiors</div>
-      <p class="feature-desc">Each room designed by award-winning architects, blending regional artistry with contemporary luxury — no two spaces identical.</p>
+      <p class="feature-desc">Each room designed by award-winning architects, blending Indian artistry with contemporary luxury &mdash; no two spaces identical.</p>
     </div>
     <div class="feature-item reveal reveal-delay-1">
       <div class="feature-n">02</div>
-      <div class="feature-icon">⊞</div>
+      <div class="feature-icon">&#8861;</div>
       <div class="feature-title">Michelin Dining</div>
-      <p class="feature-desc">Three Michelin-starred restaurants serving seasonally-driven menus from the world's finest produce, prepared tableside.</p>
+      <p class="feature-desc">Three Michelin-starred restaurants serving seasonally-driven menus from the finest Indian and international produce.</p>
     </div>
     <div class="feature-item reveal reveal-delay-2">
       <div class="feature-n">03</div>
-      <div class="feature-icon">◎</div>
+      <div class="feature-icon">&#9678;</div>
       <div class="feature-title">Wellness Sanctuary</div>
-      <p class="feature-desc">A 10,000 sq ft private spa with thermal pools, bespoke treatments, and a state-of-the-art training studio.</p>
+      <p class="feature-desc">A 10,000 sq ft private spa with Ayurvedic treatments, thermal pools, and a state-of-the-art fitness studio.</p>
     </div>
     <div class="feature-item reveal reveal-delay-3">
       <div class="feature-n">04</div>
-      <div class="feature-icon">▷</div>
+      <div class="feature-icon">&#9655;</div>
       <div class="feature-title">Instant Confirmation</div>
       <p class="feature-desc">Our real-time booking system provides instant confirmation with live availability across all room categories.</p>
     </div>
     <div class="feature-item reveal reveal-delay-4">
       <div class="feature-n">05</div>
-      <div class="feature-icon">⌇</div>
+      <div class="feature-icon">&#9479;</div>
       <div class="feature-title">Intelligent Rooms</div>
       <p class="feature-desc">Voice-controlled climate, lighting, and entertainment. Seamless ultra-fast connectivity throughout the property.</p>
     </div>
     <div class="feature-item reveal reveal-delay-5">
       <div class="feature-n">06</div>
-      <div class="feature-icon">✦</div>
+      <div class="feature-icon">&#10022;</div>
       <div class="feature-title">Personal Concierge</div>
-      <p class="feature-desc">A dedicated team of multilingual specialists — your private liaison for reservations, itineraries, and every request.</p>
+      <p class="feature-desc">A dedicated team of multilingual specialists &mdash; your private liaison for reservations, itineraries, and every request.</p>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- ══ FOOTER ════════════════════════════════ -->
 <footer class="footer">
   <div class="footer-grid">
     <div>
       <div class="footer-brand-name">Grand <em>Horizon</em></div>
-      <p class="footer-tagline">A landmark of refined hospitality since 1924 — where every stay becomes a story worth telling.</p>
+      <p class="footer-tagline">A landmark of refined hospitality since 1924 &mdash; where every stay becomes a story worth telling.</p>
       <div class="footer-divider"></div>
       <div class="footer-contact">
-        +91 98765 4320<br>
+        +91 98765 43210<br>
         reservations@grandhorizon.in<br>
-        Horizon Palace, Marine Drive, Mumbai, Maharashtra, India
+        Horizon Palace, Marine Drive,<br>
+        Mumbai, Maharashtra, India
       </div>
     </div>
     <div>
@@ -174,4 +176,12 @@
 </footer>
 
 <div class="toast-container" id="toastContainer"></div>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script
+<script src="js/main.js"></script>
+<script src="js/rooms.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  renderRoomCards(document.getElementById('homeGrid'), ROOMS.slice(0, 3));
+});
+</script>
+</body>
+</html>
