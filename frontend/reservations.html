@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Reservations — Grand Horizon</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="nav scrolled" id="mainNav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-emblem">GH</div>
+    <span class="nav-brand-name">Grand <em>Horizon</em></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html"        class="nav-link">Home</a>
+    <a href="rooms.html"        class="nav-link">Rooms</a>
+    <a href="booking.html"      class="nav-link">Book Now</a>
+    <a href="reservations.html" class="nav-link active">Reservations</a>
+    <a href="booking.html"      class="nav-link nav-cta">Reserve a Room</a>
+  </div>
+  <button class="nav-mobile-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header-bg" style="background-image:url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1600&q=80');"></div>
+  <div class="page-header-content">
+    <div class="page-header-label">Your Bookings</div>
+    <h1>My <span class="italic">Reservations</span></h1>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="reservations-layout">
+
+  <!-- Stats -->
+  <div class="stats-row reveal">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Bookings</div>
+      <div class="stat-card-value" id="statTotal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Confirmed</div>
+      <div class="stat-card-value" id="statConfirmed">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Revenue</div>
+      <div class="stat-card-value" style="font-size:28px;" id="statRevenue">&#8377;0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Avg. Stay (nights)</div>
+      <div class="stat-card-value" id="statAvg">0</div>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div class="search-bar reveal">
+    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, booking ID, email or room&#8230;">
+    <select class="search-bar-select" id="statusFilter">
+      <option value="all">All Status</option>
+      <option value="Confirmed">Confirmed</option>
+      <option value="Pending">Pending</option>
+      <option value="Cancelled">Cancelled</option>
+    </select>
+    <button class="search-bar-btn" id="exportAllBtn">Export All</button>
+  </div>
+
+  <!-- Table -->
+  <div class="reservations-table-wrap reveal">
+    <table class="res-table">
+      <thead>
+        <tr>
+          <th>Booking Ref</th>
+          <th>Guest Name</th>
+          <th>Room</th>
+          <th>Check-In</th>
+          <th>Check-Out</th>
+          <th>Nights</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="resTbody">
+        <tr><td colspan="9">
+          <div class="empty-state">
+            <div class="empty-state-icon">&#9723;</div>
+            <div class="empty-state-text">No reservations yet</div>
+            <div class="empty-state-sub">Your confirmed bookings will appear here</div>
+            <a href="booking.html" class="btn-primary" style="display:inline-flex;margin-top:16px;">Book a Room &rarr;</a>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-panel-header">
+      <div>
+        <div class="detail-panel-id" id="detailId"></div>
+        <div class="detail-panel-title" id="detailName"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;" id="detailActions"></div>
+    </div>
+    <div class="detail-grid">
+      <div><div class="detail-item-label">Room</div><div class="detail-item-val" id="detailRoom"></div></div>
+      <div><div class="detail-item-label">Check-In</div><div class="detail-item-val" id="detailIn"></div></div>
+      <div><div class="detail-item-label">Check-Out</div><div class="detail-item-val" id="detailOut"></div></div>
+      <div><div class="detail-item-label">Duration</div><div class="detail-item-val" id="detailNights"></div></div>
+      <div><div class="detail-item-label">Total Charged</div><div class="detail-item-val text-gold" id="detailTotal"></div></div>
+      <div><div class="detail-item-label">Status</div><div class="detail-item-val"><span id="detailStatus"></span></div></div>
+    </div>
+    <div class="detail-extra">
+      <div class="detail-extra-item"><label>Email</label><span id="detailEmail"></span></div>
+      <div class="detail-extra-item"><label>Phone</label><span id="detailPhone"></span></div>
+      <div class="detail-extra-item"><label>Payment</label><span id="detailPayment"></span></div>
+      <div class="detail-extra-item"><label>Room Rate</label><span id="detailRate"></span></div>
+      <div class="detail-extra-item"><label>Tax (12%)</label><span id="detailTax"></span></div>
+      <div class="detail-extra-item"><label>Booked On</label><span id="detailCreated"></span></div>
+    </div>
+    <div style="background:var(--bg-muted);padding:14px 22px;margin-top:2px;font-size:12px;color:var(--text-dim);border:1px solid var(--border);border-top:none;">
+      <span style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-family:var(--ff-m);margin-right:10px;">Special Requests</span>
+      <span id="detailSpecial"></span>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom" style="border-top:none;padding-top:0;">
+    <span class="footer-copy">&#169; 2024 Grand Horizon Hotel. All rights reserved. Built by <em>Sumedh Ajay Talokar</em></span>
+    <span class="footer-badge">Hotel Management System</span>
+  </div>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="js/main.js"></script>
+<script src="js/rooms.js"></script>
+<script src="js/reservations.js"></script>
+</body>
+</html>
