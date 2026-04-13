@@ -206,3 +206,199 @@ private:
         return arr;
     }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 2: BASE ROOM CLASS + DERIVED TYPES
+// ═══════════════════════════════════════════════════════════════
+
+class Room {
+protected:
+    std::string roomId;
+    std::string roomNumber;
+    std::string roomName;
+    double basePrice;
+    int maxGuests;
+    int sqft;
+    bool available;
+    std::vector<std::string> amenities;
+
+public:
+    Room(const std::string& id, const std::string& num, const std::string& name,
+         double price, int maxG, int sqFt)
+        : roomId(id), roomNumber(num), roomName(name),
+          basePrice(price), maxGuests(maxG), sqft(sqFt), available(true) {}
+
+    virtual ~Room() = default;
+
+    // Getters
+    std::string getId() const { return roomId; }
+    std::string getNumber() const { return roomNumber; }
+    std::string getName() const { return roomName; }
+    double getBasePrice() const { return basePrice; }
+    int getMaxGuests() const { return maxGuests; }
+    bool isAvailable() const { return available; }
+
+    void setAvailable(bool avail) { available = avail; }
+    void addAmenity(const std::string& a) { amenities.push_back(a); }
+
+    // Virtual methods — overridden by derived classes
+    virtual std::string getType() const = 0;
+    virtual double calculateNightlyRate(int nights) const {
+        // Base: flat rate
+        return basePrice;
+    }
+    virtual double calculateTotal(int nights) const {
+        return calculateNightlyRate(nights) * nights;
+    }
+    virtual std::string getDescription() const = 0;
+
+    // Display info
+    virtual void display() const {
+        std::cout << "  [" << getType() << "] Room " << roomNumber
+                  << " — " << roomName << "\n"
+                  << "  Price: $" << std::fixed << std::setprecision(2)
+                  << basePrice << "/night | Max guests: " << maxGuests
+                  << " | " << sqft << " sq ft"
+                  << " | " << (available ? "Available" : "Booked") << "\n";
+    }
+
+    JSON toJSON() const {
+        JSON j; j.type = JSON::OBJECT;
+        j.obj["id"] = JSON(roomId);
+        j.obj["number"] = JSON(roomNumber);
+        j.obj["name"] = JSON(roomName);
+        j.obj["type"] = JSON(getType());
+        j.obj["price"] = JSON(basePrice);
+        j.obj["maxGuests"] = JSON((double)maxGuests);
+        j.obj["sqft"] = JSON((double)sqft);
+        j.obj["available"] = JSON(available);
+        j.obj["description"] = JSON(getDescription());
+        JSON amenArr; amenArr.type = JSON::ARRAY;
+        for (const auto& a : amenities) amenArr.arr.push_back(JSON(a));
+        j.obj["amenities"] = amenArr;
+        return j;
+    }
+};
+
+// ─── Standard Room ────────────────────────────────────────────
+class StandardRoom : public Room {
+public:
+    StandardRoom(const std::string& id, const std::string& num, const std::string& name,
+                 double price, int maxG = 2, int sqFt = 320)
+        : Room(id, num, name, price, maxG, sqFt) {}
+
+    std::string getType() const override { return "Standard"; }
+    std::string getDescription() const override {
+        return "Comfortable standard room with essential amenities and modern decor.";
+    }
+    double calculateNightlyRate(int nights) const override {
+        // Standard: flat rate with 5% discount for 7+ nights
+        return nights >= 7 ? basePrice * 0.95 : basePrice;
+    }
+};
+
+// ─── Deluxe Room ─────────────────────────────────────────────
+class DeluxeRoom : public Room {
+    bool hasOceanView;
+public:
+    DeluxeRoom(const std::string& id, const std::string& num, const std::string& name,
+               double price, bool oceanView = false, int maxG = 3, int sqFt = 480)
+        : Room(id, num, name, price, maxG, sqFt), hasOceanView(oceanView) {}
+
+    std::string getType() const override { return "Deluxe"; }
+    std::string getDescription() const override {
+        return "Premium deluxe room with superior furnishings and stunning views.";
+    }
+    double calculateNightlyRate(int nights) const override {
+        // Deluxe: 8% discount for 5+ nights, 15% for 10+
+        if (nights >= 10) return basePrice * 0.85;
+        if (nights >= 5)  return basePrice * 0.92;
+        return basePrice;
+    }
+    bool getOceanView() const { return hasOceanView; }
+};
+
+// ─── Suite Room ───────────────────────────────────────────────
+class SuiteRoom : public Room {
+    int numBedrooms;
+    bool hasButler;
+public:
+    SuiteRoom(const std::string& id, const std::string& num, const std::string& name,
+              double price, int bedrooms = 1, bool butler = false, int maxG = 4, int sqFt = 1800)
+        : Room(id, num, name, price, maxG, sqFt), numBedrooms(bedrooms), hasButler(butler) {}
+
+    std::string getType() const override { return "Suite"; }
+    std::string getDescription() const override {
+        return std::to_string(numBedrooms) + "-bedroom luxury suite with premium services.";
+    }
+    double calculateNightlyRate(int nights) const override {
+        // Suite: 10% off for 3+ nights, butler surcharge applied separately
+        double rate = nights >= 3 ? basePrice * 0.90 : basePrice;
+        return rate;
+    }
+    int getBedrooms() const { return numBedrooms; }
+    bool getHasButler() const { return hasButler; }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 3: GUEST CLASS
+// ═══════════════════════════════════════════════════════════════
+
+class Guest {
+    std::string firstName, lastName, email, phone, idNumber;
+    int numGuests;
+
+public:
+    Guest() : numGuests(1) {}
+    Guest(const std::string& fn, const std::string& ln,
+          const std::string& em, const std::string& ph,
+          const std::string& id, int n)
+        : firstName(fn), lastName(ln), email(em),
+          phone(ph), idNumber(id), numGuests(n) {}
+
+    // Getters
+    std::string getFullName() const { return firstName + " " + lastName; }
+    std::string getFirstName() const { return firstName; }
+    std::string getLastName() const { return lastName; }
+    std::string getEmail() const { return email; }
+    std::string getPhone() const { return phone; }
+    std::string getIdNumber() const { return idNumber; }
+    int getNumGuests() const { return numGuests; }
+
+    // Validation
+    bool isValid() const {
+        return !firstName.empty() && !lastName.empty() &&
+               email.find('@') != std::string::npos &&
+               phone.length() >= 7 && idNumber.length() >= 5;
+    }
+
+    void display() const {
+        std::cout << "  Guest: " << getFullName()
+                  << " | Email: " << email
+                  << " | ID: " << idNumber
+                  << " | Party of " << numGuests << "\n";
+    }
+
+    JSON toJSON() const {
+        JSON j; j.type = JSON::OBJECT;
+        j.obj["firstName"] = JSON(firstName);
+        j.obj["lastName"] = JSON(lastName);
+        j.obj["fullName"] = JSON(getFullName());
+        j.obj["email"] = JSON(email);
+        j.obj["phone"] = JSON(phone);
+        j.obj["idNumber"] = JSON(idNumber);
+        j.obj["numGuests"] = JSON((double)numGuests);
+        return j;
+    }
+
+    static Guest fromJSON(const JSON& j) {
+        return Guest(
+            j.getString("firstName"),
+            j.getString("lastName"),
+            j.getString("email"),
+            j.getString("phone"),
+            j.getString("idNumber"),
+            (int)j.getNumber("guests", 1)
+        );
+    }
+};
