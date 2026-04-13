@@ -402,3 +402,216 @@ public:
         );
     }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 4: PAYMENT CLASS
+// ═══════════════════════════════════════════════════════════════
+
+class Payment {
+public:
+    enum Status { PENDING, COMPLETED, FAILED, REFUNDED };
+
+private:
+    std::string method;
+    double amount;
+    double tax;
+    double total;
+    Status status;
+    std::string transactionId;
+
+    static const double TAX_RATE;
+
+public:
+    Payment() : amount(0), tax(0), total(0), status(PENDING) {}
+
+    Payment(const std::string& method, double baseAmount)
+        : method(method), amount(baseAmount), status(PENDING) {
+        tax = baseAmount * TAX_RATE;
+        total = baseAmount + tax;
+        transactionId = generateTransactionId();
+    }
+
+    static std::string generateTransactionId() {
+        static std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(100000, 999999);
+        return "TXN-" + std::to_string(dist(rng));
+    }
+
+    void process() {
+        // Simulate payment processing
+        std::cout << "  Processing " << method << " payment of $"
+                  << std::fixed << std::setprecision(2) << total << "...\n";
+        status = COMPLETED;
+        std::cout << "  Payment APPROVED. Transaction: " << transactionId << "\n";
+    }
+
+    void refund() {
+        if (status == COMPLETED) {
+            status = REFUNDED;
+            std::cout << "  Refund issued for $" << std::fixed
+                      << std::setprecision(2) << total
+                      << ". Ref: " << transactionId << "-REF\n";
+        }
+    }
+
+    std::string getStatusStr() const {
+        switch (status) {
+            case PENDING: return "Pending";
+            case COMPLETED: return "Completed";
+            case FAILED: return "Failed";
+            case REFUNDED: return "Refunded";
+        }
+        return "Unknown";
+    }
+
+    double getAmount() const { return amount; }
+    double getTax() const { return tax; }
+    double getTotal() const { return total; }
+    std::string getMethod() const { return method; }
+    std::string getTransactionId() const { return transactionId; }
+
+    JSON toJSON() const {
+        JSON j; j.type = JSON::OBJECT;
+        j.obj["method"] = JSON(method);
+        j.obj["subtotal"] = JSON(amount);
+        j.obj["tax"] = JSON(tax);
+        j.obj["total"] = JSON(total);
+        j.obj["status"] = JSON(getStatusStr());
+        j.obj["transactionId"] = JSON(transactionId);
+        return j;
+    }
+};
+
+const double Payment::TAX_RATE = 0.12;
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 5: BOOKING CLASS
+// ═══════════════════════════════════════════════════════════════
+
+class Booking {
+    std::string bookingId;
+    Guest guest;
+    std::shared_ptr<Room> room;
+    std::string checkIn;
+    std::string checkOut;
+    int nights;
+    std::string status;
+    Payment payment;
+    std::string specialRequests;
+    std::string createdAt;
+
+public:
+    Booking() : nights(0), status("Confirmed") {}
+
+    Booking(const std::string& id, const Guest& g,
+            std::shared_ptr<Room> r,
+            const std::string& ci, const std::string& co,
+            int n, const std::string& payMethod,
+            const std::string& special = "")
+        : bookingId(id), guest(g), room(r),
+          checkIn(ci), checkOut(co), nights(n),
+          status("Confirmed"),
+          payment(payMethod, r->calculateTotal(n)),
+          specialRequests(special) {
+        createdAt = getCurrentTimestamp();
+    }
+
+    static std::string getCurrentTimestamp() {
+        auto t = std::time(nullptr);
+        auto tm = *std::localtime(&t);
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%S");
+        return oss.str();
+    }
+
+    static int calculateNights(const std::string& ci, const std::string& co) {
+        // Parse YYYY-MM-DD
+        auto parseDate = [](const std::string& d) -> std::tm {
+            std::tm tm = {};
+            std::istringstream ss(d);
+            ss >> std::get_time(&tm, "%Y-%m-%d");
+            return tm;
+        };
+        std::tm t1 = parseDate(ci);
+        std::tm t2 = parseDate(co);
+        auto time1 = std::mktime(&t1);
+        auto time2 = std::mktime(&t2);
+        double diff = std::difftime(time2, time1);
+        return (int)(diff / 86400);
+    }
+
+    static bool datesOverlap(const std::string& s1, const std::string& e1,
+                             const std::string& s2, const std::string& e2) {
+        return s1 < e2 && e1 > s2;
+    }
+
+    void confirm() {
+        status = "Confirmed";
+        payment.process();
+    }
+
+    void cancel() {
+        if (status != "Cancelled") {
+            status = "Cancelled";
+            payment.refund();
+            if (room) room->setAvailable(true);
+            std::cout << "  Booking " << bookingId << " cancelled.\n";
+        }
+    }
+
+    void display() const {
+        std::cout << "\n  ┌─ Booking: " << bookingId << " ─────────────────────\n";
+        std::cout << "  │ Guest   : " << guest.getFullName() << " (" << guest.getEmail() << ")\n";
+        std::cout << "  │ Room    : " << (room ? room->getName() : "N/A")
+                  << " [" << (room ? room->getType() : "") << "]\n";
+        std::cout << "  │ Dates   : " << checkIn << " → " << checkOut
+                  << " (" << nights << " night" << (nights!=1?"s":"") << ")\n";
+        std::cout << "  │ Payment : " << formatCurrency(payment.getTotal())
+                  << " via " << payment.getMethod() << "\n";
+        std::cout << "  │ Status  : " << status << "\n";
+        std::cout << "  └──────────────────────────────────────────\n";
+    }
+
+    static std::string formatCurrency(double amount) {
+        std::ostringstream oss;
+        oss << "$" << std::fixed << std::setprecision(2) << amount;
+        return oss.str();
+    }
+
+    // Getters
+    std::string getId() const { return bookingId; }
+    std::string getStatus() const { return status; }
+    std::string getCheckIn() const { return checkIn; }
+    std::string getCheckOut() const { return checkOut; }
+    std::shared_ptr<Room> getRoom() const { return room; }
+    int getNights() const { return nights; }
+    const Payment& getPayment() const { return payment; }
+    const Guest& getGuest() const { return guest; }
+
+    JSON toJSON() const {
+        JSON j; j.type = JSON::OBJECT;
+        j.obj["id"] = JSON(bookingId);
+        j.obj["guestName"] = JSON(guest.getFullName());
+        j.obj["email"] = JSON(guest.getEmail());
+        j.obj["phone"] = JSON(guest.getPhone());
+        j.obj["idNumber"] = JSON(guest.getIdNumber());
+        j.obj["guests"] = JSON((double)guest.getNumGuests());
+        j.obj["roomId"] = JSON(room ? room->getId() : "");
+        j.obj["roomNumber"] = JSON(room ? room->getNumber() : "");
+        j.obj["roomName"] = JSON(room ? room->getName() : "");
+        j.obj["roomType"] = JSON(room ? room->getType() : "");
+        j.obj["roomRate"] = JSON(room ? room->getBasePrice() : 0.0);
+        j.obj["checkIn"] = JSON(checkIn);
+        j.obj["checkOut"] = JSON(checkOut);
+        j.obj["nights"] = JSON((double)nights);
+        j.obj["subtotal"] = JSON(payment.getAmount());
+        j.obj["tax"] = JSON(payment.getTax());
+        j.obj["total"] = JSON(payment.getTotal());
+        j.obj["paymentMethod"] = JSON(payment.getMethod());
+        j.obj["transactionId"] = JSON(payment.getTransactionId());
+        j.obj["status"] = JSON(status);
+        j.obj["specialRequests"] = JSON(specialRequests);
+        j.obj["createdAt"] = JSON(createdAt);
+        return j;
+    }
+};
