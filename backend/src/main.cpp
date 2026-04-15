@@ -615,3 +615,482 @@ public:
         return j;
     }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 6: HOTEL MANAGER CLASS
+// ═══════════════════════════════════════════════════════════════
+
+class HotelManager {
+    std::string hotelName;
+    std::vector<std::shared_ptr<Room>> rooms;
+    std::vector<Booking> bookings;
+
+    // File paths
+    const std::string BOOKINGS_FILE = "data/bookings.json";
+    const std::string ROOMS_FILE    = "data/rooms.json";
+    const std::string INPUT_FILE    = "data/pending_booking.json";
+    const std::string OUTPUT_FILE   = "data/booking_result.json";
+
+public:
+    explicit HotelManager(const std::string& name) : hotelName(name) {
+        initRooms();
+        loadBookings();
+        syncRoomAvailability();
+    }
+
+    // ─── Initialize Rooms ─────────────────────────────
+    void initRooms() {
+        // Standard Rooms
+        auto sr1 = std::make_shared<StandardRoom>("SR101","101","Classic Standard Room", 189.0);
+        sr1->addAmenity("Queen Bed"); sr1->addAmenity("City View"); sr1->addAmenity("Free WiFi");
+
+        auto sr2 = std::make_shared<StandardRoom>("SR102","102","Garden View Standard", 199.0);
+        sr2->addAmenity("King Bed"); sr2->addAmenity("Garden View"); sr2->addAmenity("Terrace");
+
+        auto sr3 = std::make_shared<StandardRoom>("SR103","103","Twin Comfort Room", 179.0);
+        sr3->addAmenity("Twin Beds"); sr3->addAmenity("Work Desk"); sr3->addAmenity("City View");
+
+        // Deluxe Rooms
+        auto dr1 = std::make_shared<DeluxeRoom>("DR201","201","Deluxe Ocean View", 349.0, true);
+        dr1->addAmenity("King Bed"); dr1->addAmenity("Ocean View"); dr1->addAmenity("Jacuzzi");
+
+        auto dr2 = std::make_shared<DeluxeRoom>("DR202","202","Deluxe Corner Suite", 389.0, false);
+        dr2->addAmenity("King Bed"); dr2->addAmenity("Corner View"); dr2->addAmenity("Living Area");
+
+        auto dr3 = std::make_shared<DeluxeRoom>("DR203","203","Deluxe Garden Terrace", 369.0, false);
+        dr3->addAmenity("King Bed"); dr3->addAmenity("Private Terrace"); dr3->addAmenity("Garden Access");
+
+        // Suites
+        auto ss1 = std::make_shared<SuiteRoom>("SS301","301","The Grand Horizon Suite", 1290.0, 2, true);
+        ss1->addAmenity("2 Bedrooms"); ss1->addAmenity("Private Butler"); ss1->addAmenity("Home Theatre");
+
+        auto ss2 = std::make_shared<SuiteRoom>("SS302","302","Presidential Suite", 1890.0, 2, true);
+        ss2->addAmenity("2 Bedrooms"); ss2->addAmenity("Private Pool"); ss2->addAmenity("Art Collection");
+
+        auto ss3 = std::make_shared<SuiteRoom>("SS303","303","Horizon Sky Suite", 1490.0, 1, true);
+        ss3->addAmenity("Master Bedroom"); ss3->addAmenity("Rooftop Terrace"); ss3->addAmenity("Plunge Pool");
+
+        rooms = {sr1, sr2, sr3, dr1, dr2, dr3, ss1, ss2, ss3};
+        std::cout << "  ✓ " << rooms.size() << " rooms initialized.\n";
+    }
+
+    // ─── Room Lookup ──────────────────────────────────
+    std::shared_ptr<Room> findRoom(const std::string& roomId) {
+        for (auto& r : rooms)
+            if (r->getId() == roomId) return r;
+        return nullptr;
+    }
+
+    // ─── Generate Unique Booking ID ───────────────────
+    std::string generateBookingId() {
+        static std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(1000, 9999);
+        auto t = std::time(nullptr);
+        std::ostringstream oss;
+        oss << "GH-" << std::hex << std::uppercase << (t & 0xFFFF)
+            << "-" << dist(rng);
+        return oss.str();
+    }
+
+    // ─── Double Booking Check ─────────────────────────
+    bool isDoubleBooked(const std::string& roomId,
+                        const std::string& ci, const std::string& co,
+                        const std::string& excludeId = "") const {
+        for (const auto& b : bookings) {
+            if (b.getStatus() == "Cancelled") continue;
+            if (!excludeId.empty() && b.getId() == excludeId) continue;
+            if (b.getRoom() && b.getRoom()->getId() != roomId) continue;
+            if (Booking::datesOverlap(ci, co, b.getCheckIn(), b.getCheckOut()))
+                return true;
+        }
+        return false;
+    }
+
+    // ─── Process Booking from JSON ────────────────────
+    JSON processBookingRequest(const JSON& req) {
+        JSON result; result.type = JSON::OBJECT;
+
+        std::cout << "\n  Processing booking request...\n";
+
+        // 1. Extract and validate guest info
+        Guest guest = Guest::fromJSON(req);
+        if (!guest.isValid()) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Invalid guest information. Please check all required fields.");
+            return result;
+        }
+
+        // 2. Find room
+        std::string roomId = req.getString("roomId");
+        auto room = findRoom(roomId);
+        if (!room) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Room not found: " + roomId);
+            return result;
+        }
+
+        // 3. Validate availability
+        if (!room->isAvailable()) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Room " + room->getNumber() + " is not available.");
+            return result;
+        }
+
+        // 4. Validate dates
+        std::string ci = req.getString("checkIn");
+        std::string co = req.getString("checkOut");
+        if (ci.empty() || co.empty() || ci >= co) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Invalid dates. Check-out must be after check-in.");
+            return result;
+        }
+
+        int nights = Booking::calculateNights(ci, co);
+        if (nights < 1) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Minimum stay is 1 night.");
+            return result;
+        }
+
+        // 5. Check double booking
+        if (isDoubleBooked(roomId, ci, co)) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Room " + room->getNumber()
+                + " is already booked for " + ci + " to " + co + ". Please select different dates.");
+            return result;
+        }
+
+        // 6. Validate guest capacity
+        if (guest.getNumGuests() > room->getMaxGuests()) {
+            result.obj["success"] = JSON(false);
+            result.obj["error"] = JSON("Room " + room->getNumber()
+                + " has max capacity of " + std::to_string(room->getMaxGuests()) + " guests.");
+            return result;
+        }
+
+        // 7. Create booking
+        std::string payMethod = req.getString("paymentMethod", "Credit Card");
+        std::string special   = req.getString("specialRequests");
+        std::string bookingId = generateBookingId();
+
+        Booking booking(bookingId, guest, room, ci, co, nights, payMethod, special);
+        booking.confirm();
+        room->setAvailable(false);
+
+        bookings.push_back(booking);
+        saveBookings();
+
+        booking.display();
+
+        // 8. Build success response
+        result.obj["success"] = JSON(true);
+        result.obj["booking"] = booking.toJSON();
+        result.obj["message"] = JSON("Booking confirmed. "
+            + std::to_string(nights) + " night(s) in "
+            + room->getName() + ". Total: "
+            + Booking::formatCurrency(booking.getPayment().getTotal()));
+        result.obj["timestamp"] = JSON(Booking::getCurrentTimestamp());
+        result.obj["type"] = JSON("BOOKING_RESULT");
+        return result;
+    }
+
+    // ─── Cancel Booking ───────────────────────────────
+    JSON cancelBooking(const std::string& bookingId) {
+        JSON result; result.type = JSON::OBJECT;
+        for (auto& b : bookings) {
+            if (b.getId() == bookingId) {
+                b.cancel();
+                saveBookings();
+                syncRoomAvailability();
+                result.obj["success"] = JSON(true);
+                result.obj["message"] = JSON("Booking " + bookingId + " cancelled.");
+                result.obj["type"] = JSON("CANCEL_RESULT");
+                return result;
+            }
+        }
+        result.obj["success"] = JSON(false);
+        result.obj["error"] = JSON("Booking not found: " + bookingId);
+        return result;
+    }
+
+    // ─── Sync Room Availability from Bookings ─────────
+    void syncRoomAvailability() {
+        // Reset all to available
+        for (auto& r : rooms) r->setAvailable(true);
+        // Mark booked rooms
+        for (const auto& b : bookings) {
+            if (b.getStatus() != "Cancelled" && b.getRoom()) {
+                auto room = findRoom(b.getRoom()->getId());
+                if (room) {
+                    // Only mark unavailable if checkout hasn't passed
+                    // (simplified: mark all non-cancelled as unavailable)
+                    room->setAvailable(false);
+                }
+            }
+        }
+    }
+
+    // ─── File I/O ─────────────────────────────────────
+    std::string readFile(const std::string& path) {
+        std::ifstream file(path);
+        if (!file.is_open()) return "";
+        std::ostringstream ss;
+        ss << file.rdbuf();
+        return ss.str();
+    }
+
+    void writeFile(const std::string& path, const std::string& content) {
+        std::ofstream file(path);
+        if (file.is_open()) file << content;
+    }
+
+    void loadBookings() {
+        std::string content = readFile(BOOKINGS_FILE);
+        if (content.empty()) {
+            std::cout << "  (No existing bookings found — starting fresh)\n";
+            return;
+        }
+        try {
+            JSON data = JSON::parse(content);
+            if (data.type == JSON::OBJECT) {
+                auto& bArr = data.obj["bookings"];
+                for (const auto& bj : bArr.arr) {
+                    // Reconstruct lightweight booking record for collision checking
+                    // (Full reconstruction would need Room refs — here we use a minimal form)
+                    std::string rid = bj.getString("roomId");
+                    auto room = findRoom(rid);
+                    if (room) {
+                        Guest g(bj.getString("firstName", bj.getString("guestName")),
+                                "",
+                                bj.getString("email"),
+                                bj.getString("phone"),
+                                bj.getString("idNumber"),
+                                (int)bj.getNumber("guests", 1));
+                        std::string ci = bj.getString("checkIn");
+                        std::string co = bj.getString("checkOut");
+                        int n = Booking::calculateNights(ci, co);
+                        // Reconstruct booking (simplified)
+                        Booking b(bj.getString("id"), g, room, ci, co, n,
+                                  bj.getString("paymentMethod", "Card"));
+                        bookings.push_back(b);
+                    }
+                }
+            }
+            std::cout << "  ✓ Loaded " << bookings.size() << " existing booking(s).\n";
+        } catch (...) {
+            std::cout << "  (Could not parse bookings.json)\n";
+        }
+    }
+
+    void saveBookings() {
+        JSON root; root.type = JSON::OBJECT;
+        root.obj["hotel"] = JSON(hotelName);
+        root.obj["savedAt"] = JSON(Booking::getCurrentTimestamp());
+        root.obj["totalBookings"] = JSON((double)bookings.size());
+
+        JSON bArr; bArr.type = JSON::ARRAY;
+        for (const auto& b : bookings) bArr.arr.push_back(b.toJSON());
+        root.obj["bookings"] = bArr;
+
+        writeFile(BOOKINGS_FILE, root.serialize());
+        std::cout << "  ✓ Bookings saved to " << BOOKINGS_FILE << "\n";
+    }
+
+    void saveRooms() {
+        JSON root; root.type = JSON::OBJECT;
+        root.obj["hotel"] = JSON(hotelName);
+        root.obj["savedAt"] = JSON(Booking::getCurrentTimestamp());
+
+        JSON rArr; rArr.type = JSON::ARRAY;
+        for (const auto& r : rooms) rArr.arr.push_back(r->toJSON());
+        root.obj["rooms"] = rArr;
+
+        writeFile(ROOMS_FILE, root.serialize());
+        std::cout << "  ✓ Rooms saved to " << ROOMS_FILE << "\n";
+    }
+
+    // ─── Display Functions ────────────────────────────
+    void displayAllRooms() const {
+        std::cout << "\n  ╔═════════════════════════════════════╗\n";
+        std::cout << "  ║        ROOM INVENTORY               ║\n";
+        std::cout << "  ╚═════════════════════════════════════╝\n";
+        for (const auto& r : rooms) r->display();
+    }
+
+    void displayAllBookings() const {
+        std::cout << "\n  ╔═════════════════════════════════════╗\n";
+        std::cout << "  ║        ALL RESERVATIONS             ║\n";
+        std::cout << "  ╚═════════════════════════════════════╝\n";
+        if (bookings.empty()) {
+            std::cout << "  (No bookings on record)\n"; return;
+        }
+        for (const auto& b : bookings) b.display();
+    }
+
+    void displaySummary() const {
+        int confirmed = 0; double revenue = 0;
+        for (const auto& b : bookings) {
+            if (b.getStatus() == "Confirmed") {
+                confirmed++;
+                revenue += b.getPayment().getTotal();
+            }
+        }
+        std::cout << "\n  ══ HOTEL SUMMARY ══════════════════════\n";
+        std::cout << "  Hotel    : " << hotelName << "\n";
+        std::cout << "  Rooms    : " << rooms.size() << " total\n";
+        std::cout << "  Bookings : " << bookings.size() << " total / "
+                  << confirmed << " confirmed\n";
+        std::cout << "  Revenue  : " << Booking::formatCurrency(revenue) << "\n";
+        std::cout << "  ═══════════════════════════════════════\n";
+    }
+
+    // ─── Main Processing Loop ─────────────────────────
+    void run() {
+        std::cout << "\n  ╔══════════════════════════════════════════╗\n";
+        std::cout << "  ║  " << hotelName << " — Backend System     ║\n";
+        std::cout << "  ╚══════════════════════════════════════════╝\n\n";
+
+        // Save rooms inventory
+        saveRooms();
+
+        bool running = true;
+        while (running) {
+            std::cout << "\n  ┌─ MENU ─────────────────────────────────\n";
+            std::cout << "  │ 1. Process Pending Booking (from file)\n";
+            std::cout << "  │ 2. Make New Booking (interactive)\n";
+            std::cout << "  │ 3. Cancel Booking\n";
+            std::cout << "  │ 4. View All Rooms\n";
+            std::cout << "  │ 5. View All Reservations\n";
+            std::cout << "  │ 6. Hotel Summary\n";
+            std::cout << "  │ 7. Exit\n";
+            std::cout << "  └────────────────────────────────────────\n";
+            std::cout << "  Choice: ";
+
+            int choice;
+            if (!(std::cin >> choice)) break;
+            std::cin.ignore();
+
+            switch (choice) {
+                case 1: processFileBooking(); break;
+                case 2: interactiveBooking(); break;
+                case 3: interactiveCancellation(); break;
+                case 4: displayAllRooms(); break;
+                case 5: displayAllBookings(); break;
+                case 6: displaySummary(); break;
+                case 7: running = false; break;
+                default: std::cout << "  Invalid choice.\n";
+            }
+        }
+        std::cout << "\n  Goodbye from " << hotelName << "!\n\n";
+    }
+
+    // ─── File-Based Booking ───────────────────────────
+    void processFileBooking() {
+        std::cout << "\n  Reading " << INPUT_FILE << "...\n";
+        std::string content = readFile(INPUT_FILE);
+        if (content.empty()) {
+            std::cout << "  No pending booking found. Frontend must write to " << INPUT_FILE << " first.\n";
+            return;
+        }
+
+        JSON req = JSON::parse(content);
+        JSON result = processBookingRequest(req);
+        writeFile(OUTPUT_FILE, result.serialize());
+        std::cout << "  Result written to " << OUTPUT_FILE << "\n";
+
+        if (result.getBool("success")) {
+            // Clear processed input
+            writeFile(INPUT_FILE, "{}");
+        }
+    }
+
+    // ─── Interactive Booking (CLI) ─────────────────────
+    void interactiveBooking() {
+        std::cout << "\n  ── NEW BOOKING ──────────────────────────\n";
+
+        // Display available rooms
+        std::cout << "\n  Available Rooms:\n";
+        for (const auto& r : rooms) {
+            if (r->isAvailable()) {
+                std::cout << "  [" << r->getId() << "] " << r->getType()
+                          << " - " << r->getName()
+                          << " ($" << std::fixed << std::setprecision(2)
+                          << r->getBasePrice() << "/nt)\n";
+            }
+        }
+
+        // Collect input
+        auto prompt = [](const std::string& label) {
+            std::cout << "  " << label << ": ";
+            std::string val; std::getline(std::cin, val);
+            return val;
+        };
+
+        std::string fn = prompt("First Name");
+        std::string ln = prompt("Last Name");
+        std::string em = prompt("Email");
+        std::string ph = prompt("Phone");
+        std::string id = prompt("ID Number");
+        std::string gn = prompt("Number of Guests");
+        std::string ri = prompt("Room ID");
+        std::string ci = prompt("Check-In (YYYY-MM-DD)");
+        std::string co = prompt("Check-Out (YYYY-MM-DD)");
+        std::string pm = prompt("Payment Method (Credit Card/Debit Card/Cash)");
+        std::string sr = prompt("Special Requests (optional)");
+
+        // Build JSON request
+        JSON req; req.type = JSON::OBJECT;
+        req.obj["firstName"] = JSON(fn);
+        req.obj["lastName"]  = JSON(ln);
+        req.obj["email"]     = JSON(em);
+        req.obj["phone"]     = JSON(ph);
+        req.obj["idNumber"]  = JSON(id);
+        req.obj["guests"]    = JSON(std::stod(gn.empty() ? "1" : gn));
+        req.obj["roomId"]    = JSON(ri);
+        req.obj["checkIn"]   = JSON(ci);
+        req.obj["checkOut"]  = JSON(co);
+        req.obj["paymentMethod"] = JSON(pm);
+        req.obj["specialRequests"] = JSON(sr);
+
+        JSON result = processBookingRequest(req);
+        writeFile(OUTPUT_FILE, result.serialize());
+
+        if (result.getBool("success")) {
+            std::cout << "\n  ✓ " << result.getString("message") << "\n";
+        } else {
+            std::cout << "\n  ✗ Error: " << result.getString("error") << "\n";
+        }
+    }
+
+    // ─── Interactive Cancellation ─────────────────────
+    void interactiveCancellation() {
+        std::cout << "\n  ── CANCEL BOOKING ───────────────────────\n";
+        displayAllBookings();
+        std::cout << "  Enter Booking ID to cancel: ";
+        std::string id; std::getline(std::cin, id);
+        JSON result = cancelBooking(id);
+        if (result.getBool("success")) {
+            std::cout << "  ✓ " << result.getString("message") << "\n";
+        } else {
+            std::cout << "  ✗ " << result.getString("error") << "\n";
+        }
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 7: MAIN ENTRY POINT
+// ═══════════════════════════════════════════════════════════════
+
+int main() {
+    std::cout << "\n";
+    std::cout << "  ████████████████████████████████████████████\n";
+    std::cout << "  █                                          █\n";
+    std::cout << "  █     GRAND HORIZON HOTEL MANAGEMENT       █\n";
+    std::cout << "  █          C++ Backend System              █\n";
+    std::cout << "  █                                          █\n";
+    std::cout << "  ████████████████████████████████████████████\n\n";
+
+    HotelManager hotel("Grand Horizon Hotel");
+    hotel.run();
+    return 0;
+}
