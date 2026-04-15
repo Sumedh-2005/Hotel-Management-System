@@ -1,0 +1,25 @@
+# C++ build artifacts
+backend/hotel
+backend/hotel.exe
+backend/*.o
+backend/build/
+
+# Runtime data files (auto-generated — do not commit)
+backend/data/pending_booking.json
+backend/data/booking_result.json
+backend/data/bookings.json
+backend/data/rooms.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Node (if dev server added)
+node_modules/
