@@ -1,8 +1,5 @@
 # Grand Horizon — Hotel Management System
 
-<<<<<<< Updated upstream
-# Grand Horizon — Hotel Management System
-=======
 A full-stack Hotel Management System with a professional light-theme web frontend and a C++ OOP backend.
 
 **Built by Sumedh Ajay Talokar**
@@ -85,4 +82,3 @@ git push -u origin main
 ---
 
 *© 2024 Grand Horizon Hotel. Built by Sumedh Ajay Talokar*
->>>>>>> Stashed changes
